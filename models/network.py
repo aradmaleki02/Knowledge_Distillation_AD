@@ -67,7 +67,7 @@ def make_arch(idx, cfg, use_bias, batch_norm=False):
 class Vgg16(torch.nn.Module):
     def __init__(self, pretrain):
         super(Vgg16, self).__init__()
-        features = list(vgg16('vgg16-397923af.pth').features)
+        features = list(vgg16('/kaggle/working/Knowledge_Distillation_AD/models/vgg16-397923af.pth').features)
 
         if not pretrain:
             for ind, f in enumerate(features):
