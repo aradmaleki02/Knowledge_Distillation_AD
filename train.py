@@ -6,12 +6,82 @@ from torch.autograd import Variable
 import pickle
 from test_functions import detection_test
 from loss_functions import *
+from glob import glob
 
 parser = ArgumentParser()
 parser.add_argument('--config', type=str, default='configs/config.yaml', help="training configuration")
 
 
-def train(config):
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, Dataset
+import matplotlib.pyplot as plt
+import random
+from PIL import Image
+from glob import glob
+
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import Dataset, DataLoader
+import numpy as np
+from torch.utils.data.dataset import Subset
+
+class Brain_MRI(Dataset):
+    def __init__(self, image_path, labels, transform=None, count=-1):
+        self.transform = transform
+        self.image_files = image_path
+        self.labels = labels
+        if count != -1:
+            if count<len(self.image_files):
+                self.image_files = self.image_files[:count]
+                self.labels = self.labels[:count]
+            else:
+                t = len(self.image_files)
+                for i in range(count-t):
+                    self.image_files.append(random.choice(self.image_files[:t]))
+                    self.labels.append(random.choice(self.labels[:t]))
+
+    def __getitem__(self, index):
+        image_file = self.image_files[index]
+        image = Image.open(image_file)
+        image = image.convert('RGB')
+        if self.transform is not None:
+            image = self.transform(image)
+        return image, self.labels[index]
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+def import_loaders(batch_size, Br35H=True, first_dataset=True):
+    root = 'Br35H' if Br35H else 'brats'
+    train_normal_path = glob(f'./{root}/dataset/train/normal/*')
+    train_label = [0] * len(train_normal_path)
+    test_normal_path = glob(f'./{root}/dataset/test/normal/*')
+    test_anomaly_path = glob(f'./{root}/dataset/test/anomaly/*')
+
+    test_path = test_normal_path + test_anomaly_path
+    test_label = [0] * len(test_normal_path) + [1] * len(test_anomaly_path)
+
+    whole_test_path = train_normal_path + test_path
+    whole_test_label = [0] * len(train_normal_path) + test_label
+
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+    ])
+    train_set = Brain_MRI(image_path=train_normal_path, labels=train_label, transform=transform)
+    test_set = Brain_MRI(image_path=test_path, labels=test_label, transform=transform)
+    whole_test_set = Brain_MRI(image_path=whole_test_path, labels=whole_test_label, transform=transform)
+
+    train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, batch_size=batch_size)
+    test_loader = torch.utils.data.DataLoader(test_set, shuffle=False, batch_size=batch_size)
+    whole_test_loader = torch.utils.data.DataLoader(whole_test_set, shuffle=False, batch_size=batch_size)
+
+    if first_dataset:
+        return train_loader, test_loader
+    return train_loader, whole_test_loader
+
+def train(config, Br35H):
     direction_loss_only = config["direction_loss_only"]
     normal_class = config["normal_class"]
     learning_rate = float(config['learning_rate'])
@@ -25,7 +95,7 @@ def train(config):
     # create directory
     Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
-    train_dataloader, test_dataloader = load_data(config)
+    train_dataloader, test_dataloader = import_loaders(batch_size=64, Br35H=True, first_dataset=True)
     if continue_train:
         vgg, model = get_networks(config, load_checkpoint=True)
     else:
@@ -92,7 +162,7 @@ def train(config):
 def main():
     args = parser.parse_args()
     config = get_config(args.config)
-    train(config)
+    train(config, Br35H=True)
 
 
 if __name__ == '__main__':
