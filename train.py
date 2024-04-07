@@ -59,6 +59,7 @@ def import_loaders(batch_size, Br35H=True, first_dataset=True):
     test_normal_path = glob(f'./{root}/dataset/test/normal/*')
     test_anomaly_path = glob(f'./{root}/dataset/test/anomaly/*')
 
+    print(f'./{root}/dataset/train/normal/')
     print(train_normal_path, test_normal_path, test_anomaly_path)
     print(len(train_normal_path), len(test_normal_path), len(test_anomaly_path))
 
