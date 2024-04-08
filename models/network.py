@@ -67,7 +67,11 @@ def make_arch(idx, cfg, use_bias, batch_norm=False):
 class Vgg16(torch.nn.Module):
     def __init__(self, pretrain):
         super(Vgg16, self).__init__()
-        features = list(vgg16('https://download.pytorch.org/models/vgg16-397923af.pth').features)
+        checkpoint = torch.load('models/vgg16-397923af.pth')
+        print(checkpoint.keys())
+        modelvgg = vgg16(pretrained=False)
+        modelvgg.load_state_dict(checkpoint)
+        features = list(modelvgg.features)
 
         if not pretrain:
             for ind, f in enumerate(features):
