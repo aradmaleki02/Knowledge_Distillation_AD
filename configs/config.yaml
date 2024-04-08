@@ -1,7 +1,7 @@
 # Data parameters
 experiment_name: 'local_equal_net'
 dataset_name: Br35H # [mnist, fashionmnist, cifar10, mvtec, retina]
-last_checkpoint: 201
+last_checkpoint: 200
 
 
 # Training parameters
