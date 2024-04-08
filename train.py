@@ -70,8 +70,9 @@ def import_loaders(batch_size, Br35H=True, first_dataset=True):
     whole_test_label = [0] * len(train_normal_path) + test_label
 
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((128, 128)),
         transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     train_set = Brain_MRI(image_path=train_normal_path, labels=train_label, transform=transform)
     test_set = Brain_MRI(image_path=test_path, labels=test_label, transform=transform)
