@@ -100,7 +100,7 @@ def train(config, Br35H):
     # create directory
     Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
-    train_dataloader, test_dataloader = import_loaders(batch_size=config['batch_size'], Br35H=True, first_dataset=True)
+    train_dataloader, test_dataloader = import_loaders(batch_size=config['batch_size'], Br35H=False, first_dataset=True)
     if continue_train:
         vgg, model = get_networks(config, load_checkpoint=True)
     else:

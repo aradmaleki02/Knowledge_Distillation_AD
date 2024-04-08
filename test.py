@@ -92,7 +92,7 @@ def main():
 
     # Detection test
     else:
-        _, test_dataloader = import_loaders(config['batch_size'], Br35H=False, first_dataset=False)
+        _, test_dataloader = import_loaders(config['batch_size'], Br35H=True, first_dataset=False)
         roc_auc = detection_test(model=model, vgg=vgg, test_dataloader=test_dataloader, config=config)
     last_checkpoint = config['last_checkpoint']
     print("RocAUC after {} epoch:".format(last_checkpoint), roc_auc)
