@@ -1,11 +1,11 @@
 # Data parameters
 experiment_name: 'local_equal_net'
 dataset_name: Br35H # [mnist, fashionmnist, cifar10, mvtec, retina]
-last_checkpoint: 200
+last_checkpoint: 50
 
 
 # Training parameters
-num_epochs: 201 # mnist/fashionmnist:51, cifar10:201, mvtec:601
+num_epochs: 51 # mnist/fashionmnist:51, cifar10:201, mvtec:601
 batch_size: 64
 learning_rate: 1e-3
 mvtec_img_size: 128
