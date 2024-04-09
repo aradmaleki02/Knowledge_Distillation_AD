@@ -10,6 +10,7 @@ from glob import glob
 
 parser = ArgumentParser()
 parser.add_argument('--config', type=str, default='configs/config.yaml', help="training configuration")
+parser.add_argument('--root', type=str, default='Br35H', help='training dataset')
 
 
 from torchvision import datasets, transforms
@@ -52,8 +53,7 @@ class Brain_MRI(Dataset):
         return len(self.image_files)
 
 
-def import_loaders(batch_size, Br35H=True, first_dataset=True):
-    root = 'Br35H' if Br35H else 'brats'
+def import_loaders(batch_size, root, first_dataset=True):
     train_normal_path = glob(f'./{root}/dataset/train/normal/*')
     train_label = [0] * len(train_normal_path)
     test_normal_path = glob(f'./{root}/dataset/test/normal/*')
@@ -86,7 +86,7 @@ def import_loaders(batch_size, Br35H=True, first_dataset=True):
         return train_loader, test_loader
     return train_loader, whole_test_loader
 
-def train(config, Br35H):
+def train(config, root):
     direction_loss_only = config["direction_loss_only"]
     normal_class = config["normal_class"]
     learning_rate = float(config['learning_rate'])
@@ -100,7 +100,7 @@ def train(config, Br35H):
     # create directory
     Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
 
-    train_dataloader, test_dataloader = import_loaders(batch_size=config['batch_size'], Br35H=False, first_dataset=True)
+    train_dataloader, test_dataloader = import_loaders(config['batch_size'], root, first_dataset=True)
     if continue_train:
         vgg, model = get_networks(config, load_checkpoint=True)
     else:
@@ -167,7 +167,8 @@ def train(config, Br35H):
 def main():
     args = parser.parse_args()
     config = get_config(args.config)
-    train(config, Br35H=True)
+    root = args.root
+    train(config, root)
 
 
 if __name__ == '__main__':

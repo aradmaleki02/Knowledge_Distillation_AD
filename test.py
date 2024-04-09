@@ -18,6 +18,8 @@ from torch.utils.data.dataset import Subset
 
 parser = ArgumentParser()
 parser.add_argument('--config', type=str, default='configs/config.yaml', help="training configuration")
+parser.add_argument('--root', type=str, default='Br35H', help='training dataset')
+
 
 class Brain_MRI(Dataset):
     def __init__(self, image_path, labels, transform=None, count=-1):
@@ -45,8 +47,7 @@ class Brain_MRI(Dataset):
     def __len__(self):
         return len(self.image_files)
 
-def import_loaders(batch_size, Br35H=True, first_dataset=True):
-    root = 'Br35H' if Br35H else 'brats'
+def import_loaders(batch_size, root, first_dataset=True):
     train_normal_path = glob(f'./{root}/dataset/train/normal/*')
     train_label = [0] * len(train_normal_path)
     test_normal_path = glob(f'./{root}/dataset/test/normal/*')
@@ -82,6 +83,7 @@ def import_loaders(batch_size, Br35H=True, first_dataset=True):
 def main():
     args = parser.parse_args()
     config = get_config(args.config)
+    root = args.root
     vgg, model = get_networks(config, load_checkpoint=True)
 
     # Localization test
@@ -92,7 +94,7 @@ def main():
 
     # Detection test
     else:
-        _, test_dataloader = import_loaders(config['batch_size'], Br35H=True, first_dataset=False)
+        _, test_dataloader = import_loaders(config['batch_size'], root, first_dataset=False)
         roc_auc = detection_test(model=model, vgg=vgg, test_dataloader=test_dataloader, config=config)
     last_checkpoint = config['last_checkpoint']
     print("RocAUC after {} epoch:".format(last_checkpoint), roc_auc)
